@@ -15,6 +15,10 @@ public:
     void add (Histogram* h){
         hists.push_back (h);
     }
+
+    void update(int pno, double value){
+        hists[pno - 1]->update(value);
+    }
     
     void print (){
         int nhists = hists.size();
