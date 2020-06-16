@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
     int b = 20; 	// default capacity of the request buffer, you should change this default
 	int m = MAX_MESSAGE; 	// default capacity of the message buffer
     srand(time_t(NULL));
-    string fname = "10.csv";
+    string fname = "";
     
     int opt = -1;
 
