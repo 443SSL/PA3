@@ -5,7 +5,11 @@
 #include <queue>
 #include <string>
 #include <pthread.h>
+#include <thread>
 #include <mutex>
+#include <vector>
+#include <condition_variable>
+
 
 using namespace std;
 
@@ -23,6 +27,8 @@ private:
 
 	//for thread safety
 	mutex m;
+	condition_variable data_available; // for wait by the pop, signaled by push functions
+	condition_variable slot_available; // waited on by the push
 
 
 public:
@@ -34,37 +40,40 @@ public:
 	}
 
 	void push(char* data, int len){
-		//1. Wait until there is room in the queue (i.e., queue lengh is less than cap)
-		//TODO
 
-		//2. Convert the incoming byte sequence given by data and len into a vector<char>
+		//0. Convert the incoming byte sequence given by data and len into a vector<char>
 		vector<char> d (data, data + len);
 
-		//3. Then push the vector at the end of the queue
-		m.lock();
-		q.push(d);
-		m.unlock();
+		//1. Wait until there is room in the queue (i.e., queue lengh is less than cap)
+		unique_lock<mutex> l (m);
+		slot_available.wait (l, [this]{return q.size() < cap ;});
 
-		//4. wake up pop() threads
-		//TODO
+		//2. Then push the vector at the end of the queue
+		q.push(d);
+		l.unlock();
+
+		//3. wake up pop() threads
+		data_available.notify_one();
 	}
 
 	int pop(char* buf, int bufcap){
 		//1. Wait until the queue has at least 1 item
-		//TODO
+		unique_lock<mutex> l (m);
+		data_available.wait (l, [this]{return q.size() > 0;});
 
 		//2. pop the front item of the queue. The popped item is a vector<char>
-		m.lock();
 		vector<char> d = q.front();
 		q.pop();
-		m.unlock();
+		l.unlock();
 		//3. Convert the popped vector<char> into a char*, copy that into buf, make sure that vector<char>'s length is <= bufcap
 		assert(d.size() <= bufcap);
 		memcpy(buf, d.data(), d.size());
 
 		//4. Return the vector's length to the caller so that he knows many bytes were popped
+		slot_available.notify_one();
 
 		//5. wake up
+		return d.size();
 
 	}
 };
