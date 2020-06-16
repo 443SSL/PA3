@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
     
     int opt = -1;
 
-    while((opt = getopt(argc, argv, "m:n:b:w:p:")) != -1){
+    while((opt = getopt(argc, argv, "m:n:b:w:p:f:")) != -1){
         switch(opt){
             case 'm':
                 m = atoi(optarg);
