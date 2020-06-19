@@ -186,9 +186,12 @@ int main(int argc, char *argv[])
             workers [i].join();
         }
 
+        gettimeofday (&end, 0);
         cout << "Worker thread finished" << endl;
+        
 
         hc.print ();
+
     } else {
         thread filethread (file_thread_function, fname, &request_buffer, chan, m);
 
@@ -211,13 +214,10 @@ int main(int argc, char *argv[])
             workers [i].join();
         }
 
+        gettimeofday (&end, 0);
         cout << "Worker thread finished" << endl;
+        
     }
-    
-	/* Join all threads here */
-    gettimeofday (&end, 0);
-    //timediff (start, end);
-    // print the results
 	
     int secs = (end.tv_sec * 1e6 + end.tv_usec - start.tv_sec * 1e6 - start.tv_usec)/(int) 1e6;
     int usecs = (int)(end.tv_sec * 1e6 + end.tv_usec - start.tv_sec * 1e6 - start.tv_usec)%((int) 1e6);
